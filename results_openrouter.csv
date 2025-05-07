@@ -1,0 +1,2 @@
+image_name,input_feature,context_feature,correct_answer,llm_answer,evaluation
+image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Legibility.Hard To Read,C * exp(-2*x) - exp(-3*x),-exp(-3*x) + C*exp(-2*x),"Correct, Answers are mathematically equivalent!"
