@@ -1,35 +1,38 @@
-# Calculus Problem Tester using OpenRouter
+# Calculus Problem AI Tester and Results Dashboard
 
-This Streamlit application tests an AI model's ability to solve calculus problems presented as images. It uses OpenRouter to interact with a specified AI model (e.g., GPT-4o) and SymPy for evaluating the correctness of the solutions.
+This project provides tools to test an AI model's ability to solve calculus problems presented as images and to visualize the aggregated test results using a Dash dashboard. It uses OpenRouter to interact with specified AI models and SymPy for evaluating the correctness of mathematical solutions.
 
 ## Features
 
-*   **Streamlit UI**: Provides a user-friendly interface to initiate test runs, view live logs, and see results.
-*   **Problem Loading**: Loads calculus problems from a `problems.csv` file. Each entry includes an image name, input features, context features, and the correct answer.
-*   **Image Processing**: Sends images of calculus problems (stored in the `calculus_problems/` directory) to an AI model.
-*   **AI Interaction**: Leverages OpenRouter to communicate with various AI models.
-*   **Response Evaluation**:
-    *   Extracts the final answer from the AI's response.
-    *   Compares the AI's answer with the correct answer using either:
-        *   Simple string comparison.
-        *   Mathematical equivalence checking via SymPy.
-*   **Results Logging**: Saves detailed results of each test run (including the problem, AI's answer, and evaluation) to a CSV file (`results_openrouter.csv`).
-*   **Downloadable Results**: Allows users to download the results CSV directly from the Streamlit interface.
+*   **AI Model Testing (`ai_testing_pydantic.py` - inferred name):**
+    *   Loads calculus problems from a `problems.csv` file (image name, features, correct answer).
+    *   Sends images from `calculus_problems/` to an AI model via OpenRouter.
+    *   Extracts and evaluates the AI's final answer against the correct answer (string comparison or SymPy-based mathematical equivalence).
+    *   Saves detailed results to `aggregated_results_pydantic.csv`.
+*   **Results Analysis Dashboard (`dashboard.py`):**
+    *   Provides a web-based interface built with Dash and Plotly.
+    *   Displays overall statistics: total unique problems, total models evaluated.
+    *   Shows per-model performance at a glance: problems attempted, total runs, accuracy.
+    *   Visualizes overall evaluation outcome distribution by model using bar charts (showing counts and percentages).
+    *   Offers per-problem analysis with evaluation outcomes by model (bar charts with counts and percentages).
+    *   Uses Bootstrap for a clean and responsive layout.
+*   **Downloadable Results**: The underlying testing script likely allows for results to be saved, and the dashboard reads from this generated CSV.
 
 ## Project Structure
 
 ```
 .
 ├── .gitignore
-├── app.py                      # Main Streamlit application
+├── ai_testing_pydantic.py      # Core script for testing logic & generating aggregated_results_pydantic.csv (inferred name)
+├── dashboard.py                # Dash application for visualizing aggregated results
 ├── calculus_problems/          # Directory containing problem images
 │   └── image.png
-├── chatgpt_testing.py          # Core script for testing logic
 ├── problems.csv                # CSV file defining the problems and answers
 ├── requirements.txt            # Python dependencies
-├── results_openrouter.csv      # Output CSV for test results (created after a run)
+├── aggregated_results_pydantic.csv # Output CSV from ai_testing_pydantic.py, input for dashboard.py (created after a run)
 └── README.md                   # This file
 ```
+*(Note: Older files like `app.py` (Streamlit) and `chatgpt_testing.py` might exist in the repository but this README focuses on the `ai_testing_pydantic.py` and `dashboard.py` workflow).*
 
 ## How it Works
 
@@ -37,20 +40,13 @@ This Streamlit application tests an AI model's ability to solve calculus problem
     *   Problem definitions (image name, features, correct answer) are listed in `problems.csv`.
     *   Corresponding images are placed in the `calculus_problems/` directory.
     *   An OpenRouter API key needs to be set as an environment variable (`OPENROUTER_API_KEY`) in a `.env` file.
-2.  **Execution (`app.py`)**:
-    *   The Streamlit app (`app.py`) provides a button to "Start Testing".
-    *   Clicking the button triggers the `run_test()` function in `chatgpt_testing.py`.
-3.  **Testing Process (`chatgpt_testing.py`)**:
-    *   `load_problems()`: Reads `problems.csv`.
-    *   For each problem:
-        *   The image is encoded to base64.
-        *   `get_openrouter_response()`: The image and a prompt are sent to the configured AI model via OpenRouter. The prompt instructs the AI to provide its final answer in a format suitable for SymPy.
-        *   `evaluate_answer()`: The AI's extracted answer is compared to the `correct_answer` from the CSV. Evaluation can be a simple string match or a SymPy-based mathematical comparison.
-        *   Results (problem details, AI answer, evaluation outcome) are collected.
-    *   `save_results_to_csv()`: All results are saved to `results_openrouter.csv`.
-4.  **Display**:
-    *   The Streamlit app displays logs in real-time.
-    *   Upon completion, the test results are shown in a table and can be downloaded as a CSV.
+2.  **Test Execution (`ai_testing_pydantic.py`)**:
+    *   Run the `ai_testing_pydantic.py` script.
+    *   This script loads problems, interacts with the AI model via OpenRouter for each problem, evaluates the answers, and saves the collated results into `aggregated_results_pydantic.csv`.
+3.  **Results Visualization (`dashboard.py`)**:
+    *   Run the `dashboard.py` script.
+    *   This Dash application loads data from `aggregated_results_pydantic.csv`.
+    *   It then presents various charts and statistics in your web browser, allowing for analysis of model performance.
 
 ## Setup and Usage
 
@@ -64,6 +60,7 @@ This Streamlit application tests an AI model's ability to solve calculus problem
     ```bash
     pip install -r requirements.txt
     ```
+    *(Ensure `requirements.txt` includes `dash`, `pandas`, `plotly`, `dash-bootstrap-components`, `openai`, `python-dotenv`, `Pillow`, `sympy` and other necessary packages for `ai_testing_pydantic.py`)*
 4.  **Configure API Key:**
     *   Create a `.env` file in the root directory.
     *   Add your OpenRouter API key to it:
@@ -74,34 +71,40 @@ This Streamlit application tests an AI model's ability to solve calculus problem
     *   Add your problem images (e.g., `.png`) to the `calculus_problems/` directory.
     *   Update `problems.csv` with the details for each problem:
         *   `image_name`: Filename of the image in `calculus_problems/`.
-        *   `input_feature`: Descriptive feature of the input.
-        *   `context_feature`: Descriptive context for the problem.
+        *   `input_feature`: Descriptive feature of the input (if used by testing script).
+        *   `context_feature`: Descriptive context for the problem (if used by testing script).
         *   `correct_answer`: The correct solution, formatted as a string that SymPy can parse (e.g., `'C * exp(-2*x) - exp(-3*x)'`).
-6.  **Run the Streamlit application:**
+6.  **Run the AI testing script:**
     ```bash
-    streamlit run app.py
+    python ai_testing_pydantic.py
     ```
-7.  Open your web browser and navigate to the URL provided by Streamlit (usually `http://localhost:8501`).
-8.  Click the "▶️ Start Testing" button to begin.
+    *(This will generate/update the `aggregated_results_pydantic.csv` file)*
+7.  **Run the Dashboard application:**
+    ```bash
+    python dashboard.py
+    ```
+8.  Open your web browser and navigate to the URL provided by Dash (usually `http://0.0.0.0:8050` or `http://127.0.0.1:8050`).
 
 ## Key Files
 
-*   `app.py`: The main Streamlit web application.
-*   `chatgpt_testing.py`: Contains the core logic for loading problems, interacting with the OpenRouter API, and evaluating answers.
+*   `ai_testing_pydantic.py` (inferred name): The core script for running AI model tests.
+*   `dashboard.py`: The Dash web application for visualizing results.
 *   `problems.csv`: Defines the calculus problems, their corresponding images, and correct answers.
 *   `calculus_problems/`: Directory to store the image files for the calculus problems.
-*   `requirements.txt`: Lists the Python packages required to run the application.
+*   `aggregated_results_pydantic.csv`: Stores the aggregated output of the test runs, used by the dashboard.
+*   `requirements.txt`: Lists the Python packages required.
 *   `.env` (create this): Used to store the `OPENROUTER_API_KEY`.
-*   `results_openrouter.csv`: Stores the output of the test runs (created automatically).
 
 ## Dependencies
 
-The main dependencies are listed in `requirements.txt` and include:
-*   streamlit
-*   pandas
-*   openai
-*   python-dotenv
-*   Pillow
-*   sympy
+The main dependencies are typically listed in `requirements.txt`. Key packages for this workflow include:
+*   `dash`
+*   `dash-bootstrap-components`
+*   `plotly`
+*   `pandas`
+*   `openai` (or a similar library for OpenRouter interaction)
+*   `python-dotenv`
+*   `Pillow`
+*   `sympy`
 
-Refer to `requirements.txt` for specific versions. 
+Refer to `requirements.txt` for specific versions and a complete list. 

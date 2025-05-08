@@ -4,3 +4,4 @@ pandas
 Pillow
 sympy
 streamlit
+dash

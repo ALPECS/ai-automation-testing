@@ -1,21 +1,43 @@
 import os
 import base64
 import csv
+import json # Added for JSON parsing
 import pandas as pd
 from openai import OpenAI
 from dotenv import load_dotenv
 from PIL import Image
 from sympy import sympify, SympifyError # We'll uncomment and use this later for robust comparison
 import logging
+from pydantic import BaseModel, validator # Added Pydantic imports
+import concurrent.futures # Added for parallel execution
+
+# --- Pydantic Model Definition ---
+class LLMResponse(BaseModel):
+    derivation: str
+    final_answer: str
+
+    @validator('final_answer')
+    def validate_final_answer(cls, value):
+        if value == "Unable to solve":
+            return value
+        try:
+            sympify(value) # Try to parse with SymPy
+            return value
+        except SympifyError:
+            raise ValueError("Final answer must be a valid SymPy expression or 'Unable to solve'")
+# --- End Pydantic Model Definition ---
 
 load_dotenv()
 openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
-AI_MODEL = "openai/gpt-4o"
-PROBLEMS_CSV_PATH = "problems.csv"
-RESULTS_CSV_PATH = "results_openrouter.csv"
-IMAGE_DIR = "calculus_problems"
+# --- MODIFICATION: Define a list of models to test ---
+AI_MODELS = ["openai/gpt-4o-mini", "google/gemini-2.0-flash-001"] # Added deepseek model
 
+RESULTS_CSV_PATH = "results_pydantic.csv" # Path for individual run results (if saved manually)
+AGGREGATED_RESULTS_CSV_PATH = "aggregated_results_pydantic.csv" # Path for aggregated results
+NUM_PARALLEL_RUNS = 5 # Number of times to run the test in parallel
+IMAGE_DIR = "calculus_problems"
+PROBLEMS_CSV_PATH = "problems.csv"
 # Configure logging to output to console by default. Streamlit app will add a handler.
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -81,43 +103,45 @@ def encode_image_to_base64(image_path):
         logger.error(f"Error encoding image {image_path}: {e}")
         return None
 
-# --- CHANGE: Renamed function slightly for clarity ---
 # Function to call OpenRouter API
 def get_openrouter_response(base64_image, model="mistralai/mistral-7b-instruct", max_tokens=1000):
     """
-    Sends the image and prompt to the OpenRouter API and returns the text response.
-    The LLM is instructed to solve a calculus problem, show its work, and then provide
-    the final answer on the very last line, formatted as a Python string for SymPy's sympify(),
-    enclosed in triple backticks.
+    Sends the image and prompt to the OpenRouter API, expects a JSON response,
+    validates it, and returns the final answer.
     """
 
-    # This system rule sets the persona and high-level, critical instructions.
     system_rule = (
-        "You are an expert calculus solver. Your task is to solve the problem provided, "
-        "showing your detailed step-by-step derivation. After your derivation, the absolute "
-        "final line of your entire response MUST be the mathematical answer formatted for SymPy. "
-        "This means it should be a Python-parsable string, like '2*x**2 + sin(x)', enclosed in "
-        "triple backticks (e.g., ```2*x**2 + sin(x)```). Use Python math syntax: `**` for power, "
-        "`*` for multiplication, and standard function names like `sqrt()`, `log()`, `exp()`, `sin()`, `cos()`, `tan()`. "
-        "Do NOT use LaTeX or any other formatting for this final sympify string. "
-        "If you cannot solve the problem, the final line must be exactly: ```Unable to solve```. "
-        "No other text should accompany this final triple-backticked line."
+        "You are an expert calculus solver. Your task is to solve the problem provided. "
+        "You MUST provide your response as a JSON object with two keys: "
+        "1. \"derivation\": A string containing your detailed step-by-step derivation. "
+        "2. \"final_answer\": A string representing the mathematical answer, formatted for SymPy. "
+        "This means it should be a Python-parsable string, like '2*x**2 + sin(x)'. "
+        "If the final answer is a floating-point number, round it to 5 decimal places. "
+        "Use Python math syntax: `**` for power, `*` for multiplication, and standard function names "
+        "like `sqrt()`, `log()`, `sin()`, `cos()`, `tan()`. "
+        "Do NOT use LaTeX or any other formatting for this final_answer string. "
+        "If you cannot solve the problem, the value for 'final_answer' MUST be exactly: \"Unable to solve\"."
+        "Ensure your entire response is a single, valid JSON object."
     )
 
-    # This is the user's query, reinforcing the instructions from their perspective.
-    # It explicitly tells the LLM what to do with the image and reiterates the final line format.
     user_prompt_text = (
         "Please solve the calculus problem shown in the image. "
-        "Show all your reasoning and work step-by-step. "
-        "After you have explained your solution, ensure that the VERY LAST LINE of your response "
-        "is the final simplified answer, formatted as a Python string suitable for SymPy's `sympify()` function. "
-        "This string must be enclosed in triple backticks. For example, if the answer is (x+1)/2, "
-        "the last line should be ```(x+1)/2```. "
-        "If you are unable to find a solution, the last line must be ```Unable to solve```. "
-        "Remember, no other text or explanation on that final line, just the triple backticks and the expression (or 'Unable to solve')."
+        "Provide your response as a JSON object with two string fields: 'derivation' and 'final_answer'. "
+        "The 'derivation' field should contain all your reasoning and work step-by-step. "
+        "The 'final_answer' field must be the final simplified mathematical *expression*, formatted as a Python string "
+        "suitable for SymPy's `sympify()` function (e.g., '(x+1)/2'). "
+        "If the problem involves solving an equation for a variable (e.g., solving for 'y' in terms of 'x'), "
+        "the 'final_answer' should be the expression that this variable equals. For example, if the solution is "
+        "'y = x**2 + C', the 'final_answer' should be 'x**2 + C'. Do *not* include the 'y =' part or the full equation "
+        "in the 'final_answer'. "
+        "If the final answer is a floating-point number, please round it to 5 decimal places. "
+        "If the solution is an implicit equation from which the variable cannot be expressed as a simple expression, "
+        "or if you are unable to find a solution for any other reason, the 'final_answer' field must be exactly \"Unable to solve\". "
+        "Your entire output should be only this JSON object."
     )
 
     if not base64_image:
+        logger.error("Invalid image data passed to get_openrouter_response.")
         return "Error: Invalid image data. No image provided."
 
     messages = [
@@ -138,35 +162,27 @@ def get_openrouter_response(base64_image, model="mistralai/mistral-7b-instruct",
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=max_tokens,
-            temperature=0  
+            max_tokens=max_tokens, # Consider increasing if derivations are long
+            temperature=0,
+            response_format={"type": "json_object"} # Request JSON output from supported models
         )
-        full_response = response.choices[0].message.content.strip()
+        raw_response_content = response.choices[0].message.content.strip()
+        # logger.info(f"Raw LLM JSON response: {raw_response_content}")
 
-        lines = full_response.splitlines()
-        if not lines:
-            logger.warning("Empty response received from API.")
-            return "Error: Empty response from API."
-
-        last_line = lines[-1].strip()
-        
-        last_three_lines = lines[-3:]
-
-        # Remove the surrounding ```<answer>``` tags if present
-        #print the last three lines for debugging
-        logger.info(f"Last Three Lines before cleaning:{last_three_lines}")
-        
-        cleaned_last_line = last_line.replace("```", "").replace("<answer>", "").replace("```", "").strip()
-
-        return cleaned_last_line
+        try:
+            # Validate the response using the Pydantic model
+            validated_response = LLMResponse.model_validate_json(raw_response_content)
+            logger.info(f"Validated LLM Answer: {validated_response.final_answer}")
+            # The entire validated_response.derivation could be logged or stored if needed
+            return validated_response.final_answer
+        except ValueError as pydantic_error: # Catches Pydantic validation errors
+            logger.error(f"Pydantic validation error: {pydantic_error}. Raw response: {raw_response_content}")
+            return f"Error - LLM returned an invalid response format"
+        except json.JSONDecodeError as json_error:
+            logger.error(f"JSON decoding error: {json_error}. Raw response: {raw_response_content}")
+            return f"Error: LLM response is not valid JSON - {json_error}"
 
     except Exception as e:
-        # Log the error or handle it as needed
-        print(f"Error calling OpenRouter API: {e}")
-        return "Error: API call failed."
-
-    except Exception as e:
-        # --- CHANGE: Use logger ---
         logger.error(f"Error calling OpenRouter API: {e}")
         return f"Error: API call failed - {e}"
 
@@ -197,6 +213,9 @@ def evaluate_answer(llm_answer, correct_answer, simple_mode=True):
     if llm_answer == "Unable to solve" and correct_answer not in "Unable to solve":
         return "Incorrect, LLM is unable to solve, but the correct answer exists!"
     
+    if correct_answer == "Unable to solve" and llm_answer != "Unable to solve":
+        return "Incorrect, LLM is able to solve, but the correct answer is unsolvable!"
+    
     if simple_mode:
         # Simple string comparison (basic)
         # Remove spaces and convert to lowercase for more flexible comparison
@@ -220,13 +239,55 @@ def evaluate_answer(llm_answer, correct_answer, simple_mode=True):
 
         return "Incorrect"
     else:
+        # Attempt to treat answers as floats and compare with rounding
+        try:
+            llm_float = float(llm_answer)
+            # Correct answer might be like "Float(\\"123.456\\")"
+            # Try to extract the number part for correct_answer if it's a string containing "Float"
+            correct_answer_str = str(correct_answer)
+            if "Float(" in correct_answer_str and correct_answer_str.endswith(")"):
+                 # Attempt to extract the numeric part within Float("...")
+                 # This is a basic extraction, might need to be more robust
+                 try:
+                     # Example: Float("123.45") -> 123.45
+                     # Example: Float('1.23e+5') -> 1.23e+5
+                     # Need to handle quotes around the number carefully
+                     start = correct_answer_str.find("(") + 1
+                     end = correct_answer_str.rfind(")")
+                     num_str = correct_answer_str[start:end]
+                     # Remove potential inner quotes like Float(" '123.45' ")
+                     num_str = num_str.strip().strip("'\"")
+                     correct_float = float(num_str)
+                 except ValueError:
+                     # If extraction fails, fall back to original correct_answer for sympify
+                     pass # correct_float will not be defined, sympify path will be taken
+            else:
+                correct_float = float(correct_answer_str)
+
+            # If both are successfully converted to float
+            if 'correct_float' in locals() and isinstance(llm_float, float) and isinstance(correct_float, float):
+                # Round to 5 decimal places (or any desired precision)
+                if round(llm_float, 5) == round(correct_float, 5):
+                    return "Correct, Floats are equivalent (rounded)!"
+                else:
+                    return f"Incorrect, Answers are NOT mathematically equivalent!"
+        except (ValueError, TypeError):
+            # If conversion to float fails, proceed to SymPy comparison
+            pass
+
         try:
             try:
                 expr_llm = sympify(llm_answer)
                 expr_correct = sympify(correct_answer)
-                if expr_llm.equals(expr_correct): # .equals() performs simplification
-                     return "Correct, Answers are mathematically equivalent!"
+                # First, try the .equals() method
+                if expr_llm.equals(expr_correct):
+                     return "Correct, Answers are mathematically equivalent! (via .equals())"
+                # If .equals() is False, try simplifying the difference
+                elif (expr_llm - expr_correct).simplify() == 0:
+                    return "Correct, Answers are mathematically equivalent! (via simplified difference)"
                 else:
+                     # For debugging, log the simplified difference if it's not zero
+                     logger.info(f"Simplified difference for non-equivalence: {(expr_llm - expr_correct).simplify()}")
                      return "Incorrect, Answers are NOT mathematically equivalent!"
             except (SympifyError, TypeError, SyntaxError) as symp_err:
                  logger.warning(f"SymPy Error comparing '{llm_answer}' and '{correct_answer}': {symp_err}")
@@ -238,8 +299,14 @@ def evaluate_answer(llm_answer, correct_answer, simple_mode=True):
 def save_results_to_csv(results_data, output_path):
     """Saves the results to a CSV file."""
     try:
-        # Convert list of dictionaries to DataFrame
-        results_df = pd.DataFrame(results_data)
+        # Convert list of dictionaries or DataFrame to DataFrame
+        if isinstance(results_data, list):
+            results_df = pd.DataFrame(results_data)
+        elif isinstance(results_data, pd.DataFrame):
+            results_df = results_data # Already a DataFrame
+        else:
+            logger.error("Invalid data type for saving to CSV. Must be list or DataFrame.")
+            return False
 
         # Save to CSV
         results_df.to_csv(output_path, index=False)
@@ -251,8 +318,8 @@ def save_results_to_csv(results_data, output_path):
 
 # --- CHANGE: Renamed main to run_test and return results ---
 def run_test():
-    """Runs the full testing process and returns results."""
-    logger.info("Starting Calculus Problem Testing (using OpenRouter)...")
+    """Runs the full testing process and returns results as a DataFrame."""
+    logger.info("Starting a Calculus Problem Test Run (using OpenRouter)...")
     problems_df = load_problems(PROBLEMS_CSV_PATH)
 
     if problems_df.empty:
@@ -267,77 +334,184 @@ def run_test():
         input_feature = row['input_feature']
         context_feature = row['context_feature']
         correct_answer = str(row['correct_answer']) # Ensure correct answer is treated as string
-        # Construct full path relative to the script location or use absolute paths in CSV
-        # Assuming image_name in CSV is just the filename like 'problem1.png'
-        # and images are stored in IMAGE_DIR
         full_image_path = os.path.abspath(os.path.join(IMAGE_DIR, image_name))
 
         logger.info(f"--- Processing {index+1}/{len(problems_df)}: {image_name} (Input: {input_feature}, Context: {context_feature}) ---")
 
-        # 1. Check if image exists
         if not os.path.exists(full_image_path):
-            logger.warning(f"  Image file not found: {full_image_path}. Skipping.")
-            results_data.append({
-                'image_name': image_name,
-                'input_feature': input_feature,
-                'context_feature': context_feature,
-                'correct_answer': correct_answer,
-                'llm_answer': 'Error: Image file not found',
-                'evaluation': 'Skipped'
-            })
+            logger.warning(f"  Image file not found: {full_image_path}. Skipping for all models.")
+            # --- MODIFICATION: Add entries for each model if image not found ---
+            for model_name in AI_MODELS:
+                results_data.append({
+                    'model_name': model_name, # Added model_name
+                    'image_name': image_name,
+                    'input_feature': input_feature,
+                    'context_feature': context_feature,
+                    'correct_answer': correct_answer,
+                    'llm_answer': 'Error: Image file not found',
+                    'evaluation': 'Skipped'
+                })
             continue
 
-        # 2. Encode image
         logger.info(f"  Encoding image: {full_image_path}...")
         base64_image = encode_image_to_base64(full_image_path)
         if not base64_image:
-            logger.error("  Failed to encode image. Skipping.")
+            logger.error("  Failed to encode image. Skipping for all models.")
+            # --- MODIFICATION: Add entries for each model if encoding failed ---
+            for model_name in AI_MODELS:
+                results_data.append({
+                    'model_name': model_name, # Added model_name
+                    'image_name': image_name,
+                    'input_feature': input_feature,
+                    'context_feature': context_feature,
+                    'correct_answer': correct_answer,
+                    'llm_answer': 'Error: Image encoding failed',
+                    'evaluation': 'Error'
+                })
+            continue
+
+        # --- MODIFICATION: Iterate over each AI model ---
+        for model_name in AI_MODELS:
+            logger.info(f"  Testing with model: {model_name}...")
+            logger.info("    Sending to OpenRouter API...")
+            llm_answer = get_openrouter_response(base64_image, model=model_name)
+            logger.info(f"    Expected Answer: {correct_answer}")
+            logger.info(f"    LLM Answer ({model_name}): {llm_answer}")
+
+            evaluation_result = evaluate_answer(llm_answer, correct_answer, simple_mode=False)
+            logger.info(f"    Evaluation ({model_name}): {evaluation_result}")
+
             results_data.append({
+                'model_name': model_name, # Added model_name
                 'image_name': image_name,
                 'input_feature': input_feature,
                 'context_feature': context_feature,
                 'correct_answer': correct_answer,
-                'llm_answer': 'Error: Image encoding failed',
-                'evaluation': 'Error'
+                'llm_answer': llm_answer,
+                'evaluation': evaluation_result
             })
-            continue
-
-        # 3. Call OpenRouter API
-        logger.info("  Sending to OpenRouter API...")
-        llm_answer = get_openrouter_response(base64_image, model=AI_MODEL) # Example model
-        logger.info(f"  Expected Answer: {correct_answer}")
-        logger.info(f"  LLM Answer     : {llm_answer}")
-
-        # 4. Evaluate response
-        evaluation_result = evaluate_answer(llm_answer, correct_answer, simple_mode=False) # Switch to SymPy evaluation
-        logger.info(f"  Evaluation     : {evaluation_result}")
-
-        # 5. Store results
-        results_data.append({
-            'image_name': image_name,
-            'input_feature': input_feature,
-            'context_feature': context_feature,
-            'correct_answer': correct_answer,
-            'llm_answer': llm_answer,
-            'evaluation': evaluation_result
-        })
+    # --- End MODIFICATION for model iteration ---
 
     logger.info("\n--- Testing finished. ---")
 
     results_df = pd.DataFrame(results_data) # --- Create DataFrame here ---
 
-    # Save results to CSV
-    if not results_df.empty:
-        # Use the updated results path
-        if save_results_to_csv(results_df, RESULTS_CSV_PATH): # Pass DF directly
-             logger.info("Results DataFrame successfully saved.")
-        else:
-             logger.error("Failed to save results DataFrame.")
-    else:
-        logger.info("No results to save.")
+    # --- REMOVED: Save results to CSV for individual run ---
+    # if not results_df.empty:
+    #     if save_results_to_csv(results_df, RESULTS_CSV_PATH): # Pass DF directly
+    #          logger.info("Results DataFrame successfully saved.")
+    #     else:
+    #          logger.error("Failed to save results DataFrame.")
+    # else:
+    #     logger.info("No results to save.")
 
     return results_df # --- Return the DataFrame ---
 
 
+# --- NEW FUNCTION: Run tests in parallel and aggregate results ---
+def run_parallel_tests_and_aggregate(num_runs: int):
+    """
+    Runs the test function multiple times in parallel and aggregates the results.
+    """
+    logger.info(f"Starting {num_runs} parallel test runs...")
+    all_results_dfs = []
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_runs) as executor:
+        futures = [executor.submit(run_test) for _ in range(num_runs)]
+        for i, future in enumerate(concurrent.futures.as_completed(futures)):
+            try:
+                single_run_df = future.result()
+                if not single_run_df.empty:
+                    single_run_df['run_id'] = i # Add a run_id to distinguish runs
+                    all_results_dfs.append(single_run_df)
+                    logger.info(f"Completed run {i+1}/{num_runs}.")
+                else:
+                    logger.warning(f"Run {i+1}/{num_runs} produced no results.")
+            except Exception as e:
+                logger.error(f"Error in parallel run {i+1}/{num_runs}: {e}")
+
+    if not all_results_dfs:
+        logger.warning("No results collected from any parallel runs.")
+        return pd.DataFrame()
+
+    aggregated_df = pd.concat(all_results_dfs, ignore_index=True)
+    logger.info(f"Aggregated results from {len(all_results_dfs)} successful runs. Total rows: {len(aggregated_df)}")
+
+    if not aggregated_df.empty:
+        if save_results_to_csv(aggregated_df, AGGREGATED_RESULTS_CSV_PATH):
+            logger.info(f"Aggregated results successfully saved to {AGGREGATED_RESULTS_CSV_PATH}")
+        else:
+            logger.error(f"Failed to save aggregated results DataFrame to {AGGREGATED_RESULTS_CSV_PATH}")
+    else:
+        logger.info("Aggregated DataFrame is empty. Nothing to save.")
+
+    return aggregated_df
+
+# --- NEW FUNCTION: Analyze aggregated results ---
+def analyze_aggregated_results(aggregated_df: pd.DataFrame):
+    """
+    Performs basic analysis on the aggregated results and logs summaries.
+    """
+    if aggregated_df.empty:
+        logger.info("Aggregated DataFrame is empty. No analysis to perform.")
+        return
+
+    logger.info("\n--- Starting Analysis of Aggregated Results ---")
+
+    # Overall evaluation statistics
+    overall_evaluation_counts = aggregated_df['evaluation'].value_counts()
+    logger.info("\nOverall Evaluation Counts (Aggregated across all models):")
+    for eval_type, count in overall_evaluation_counts.items():
+        logger.info(f"  {eval_type}: {count}")
+
+    # --- MODIFICATION: Add model-specific overall evaluation ---
+    logger.info("Overall Evaluation Counts (Per Model):")
+    for model_name, model_group in aggregated_df.groupby('model_name'):
+        logger.info(f"  Model: {model_name}")
+        model_eval_counts = model_group['evaluation'].value_counts()
+        for eval_type, count in model_eval_counts.items():
+            logger.info(f"    {eval_type}: {count} ({count / len(model_group) * 100:.2f}%)")
+
+    # Per-problem analysis
+    logger.info("\nPer-Problem Analysis (Broken down by Model):")
+    # Group by problem first, then by model within each problem
+    for image_name, problem_group in aggregated_df.groupby('image_name'):
+        logger.info(f"\n  Problem: {image_name}")
+        logger.info(f"    Correct Answer: {problem_group['correct_answer'].iloc[0]}") # Assuming correct_answer is the same
+
+        for model_name, model_problem_group in problem_group.groupby('model_name'):
+            logger.info(f"    Model: {model_name}")
+
+            # LLM Answer distribution for this model and problem
+            llm_answer_counts = model_problem_group['llm_answer'].value_counts()
+            logger.info("      LLM Answer Distribution:")
+            for answer, count in llm_answer_counts.items():
+                # Count occurrences relative to the number of runs for this specific model and problem
+                num_runs_for_model_problem = len(model_problem_group)
+                logger.info(f'        - "{answer}": {count} occurrence(s) (out of {num_runs_for_model_problem} runs for this model)')
+
+            # Evaluation distribution for this model and problem
+            evaluation_counts = model_problem_group['evaluation'].value_counts()
+            logger.info("      Evaluation Outcome Distribution:")
+            for eval_type, count in evaluation_counts.items():
+                num_runs_for_model_problem = len(model_problem_group)
+                logger.info(f"        - {eval_type}: {count} occurrence(s) (out of {num_runs_for_model_problem} runs for this model, {count / num_runs_for_model_problem * 100:.2f}%)")
+    # --- End MODIFICATION for per-problem, per-model analysis ---
+
+    logger.info("\n--- Aggregated Analysis Finished ---")
+
+
 if __name__ == "__main__":
-    run_test() # --- Call the renamed function ---
+    # --- Updated main execution flow ---
+    logger.info("Main script execution started.")
+    
+    # Ensure AI_MODELS is used if defined, otherwise fall back to AI_MODEL for single model runs
+    # This part doesn't need changing as run_test now internally uses AI_MODELS
+    aggregated_results = run_parallel_tests_and_aggregate(NUM_PARALLEL_RUNS)
+    
+    if aggregated_results is not None and not aggregated_results.empty:
+        analyze_aggregated_results(aggregated_results)
+    else:
+        logger.warning("No aggregated results were generated. Skipping analysis.")
+        
+    logger.info("Main script execution finished.") 
