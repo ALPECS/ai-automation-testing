@@ -94,7 +94,7 @@ def get_openrouter_response(base64_image, model=AI_MODEL, max_tokens=500):
         "You are a calculus solver.  Return your working if you like, "
         "but the very last line **must** be just one python‑sympify string, "
         "wrapped exactly like  ```YOUR_STRING```. If you are unable to solve the problem, "
-        "the last line should be exactly ```Unable to solve```"
+        "the last line should be exactly ```Unable to solve```, do not include any other text in the last line."
     )
     
     prompt = "Solve the calculus problem shown in the image."
@@ -130,6 +130,9 @@ def get_openrouter_response(base64_image, model=AI_MODEL, max_tokens=500):
         last_line = lines[-1].strip()
 
         # Remove the surrounding ```<answer>``` tags if present
+        
+        print(f"Last Line before cleaning:{last_line}")
+        
         
         cleaned_last_line = last_line.replace("```", "").replace("<answer>", "").replace("```", "").strip()
 
