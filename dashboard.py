@@ -34,6 +34,17 @@ def load_data(csv_path):
 
 aggregated_df = load_data(AGGREGATED_RESULTS_CSV_PATH)
 
+# --- MODIFICATION: Rename models for display ---
+if not aggregated_df.empty:
+    model_name_map = {
+        "google/gemini-2.0-flash-001": "Deepseek",
+        "openai/gpt-4o-mini": "ChatGPT"
+        # Add other mappings here if needed
+    }
+    aggregated_df['model_name'] = aggregated_df['model_name'].replace(model_name_map)
+    logger.info(f"Model names replaced. Current unique model names: {aggregated_df['model_name'].unique().tolist()}")
+# --- END MODIFICATION ---
+
 # --- Initialize Dash App ---
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP]) # Modified for DBC
 app.title = "LLM Calculus Test Analysis"

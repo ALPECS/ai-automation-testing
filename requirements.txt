@@ -5,3 +5,4 @@ Pillow
 sympy
 streamlit
 dash
+dash-bootstrap-components
