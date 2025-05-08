@@ -164,16 +164,106 @@ if not aggregated_df.empty:
         per_problem_layout.append(problem_section)
     # --- End Per-Problem Sections ---
 
-    app.layout = dbc.Container(fluid=True, children=[ # Changed to DBC Container
-        dbc.Row(dbc.Col(html.H1("LLM Calculus Problem Solving: Aggregated Results Analysis", className="text-center my-4"), width=12)), # Centered title
+    # --- MODIFICATION: Add Analysis by Input Feature ---
+    input_feature_layout = [dbc.Row(dbc.Col(html.H2("Model Performance by Problem Category (Input Feature)", className="mt-5 mb-3 text-center"), width=12))]
+    unique_input_features = sorted(aggregated_df['input_feature'].unique())
 
-        *at_a_glance_section_children, # Modified: Unpack the list of components
+    for feature in unique_input_features:
+        feature_df = aggregated_df[aggregated_df['input_feature'] == feature]
+        if not feature_df.empty:
+            summary_df = feature_df.groupby(['model_name', 'evaluation']).size().reset_index(name='count')
+            model_totals = summary_df.groupby('model_name')['count'].sum().reset_index(name='total_model_count')
+            summary_df = pd.merge(summary_df, model_totals, on='model_name', how='left')
+            summary_df['percentage'] = (summary_df['count'] / summary_df['total_model_count']).fillna(0)
 
-        dbc.Row(dbc.Col(html.H2("Overall Model Performance Comparison", className="mt-4 mb-3 text-center"), width=12)), # Centered Subheader
-        dbc.Card(dbc.CardBody(dcc.Graph(id='overall-evaluation-summary', figure=fig_overall_eval)), className="shadow-sm mb-4"), # Added shadow and margin
+            fig_feature = px.bar(summary_df,
+                                   x='model_name',
+                                   y='count',
+                                   color='evaluation',
+                                   barmode='group',
+                                   title=f'Performance for Category: {feature}',
+                                   labels={'count': 'Number of Outcomes', 'model_name': 'AI Model'},
+                                   color_discrete_map={
+                                       outcome: 'green' if 'Correct' in outcome else ('red' if 'Incorrect' in outcome else 'orange')
+                                       for outcome in summary_df['evaluation'].unique()
+                                   },
+                                   custom_data=['percentage'])
+            fig_feature.update_layout(xaxis_tickangle=-45)
+            fig_feature.update_traces(texttemplate='%{y} (%{customdata[0]:.0%})', textposition='outside')
+            input_feature_layout.append(dbc.Card(dbc.CardBody(dcc.Graph(figure=fig_feature)), className="shadow-sm mb-4"))
+    # --- END MODIFICATION ---
 
-        dbc.Row(dbc.Col(html.H2("Per-Problem Analysis", className="mt-5 mb-3 text-center"), width=12)), # Centered Subheader
-        *per_problem_layout # Unpack problem sections directly
+    # --- MODIFICATION: Add Analysis by Context Feature ---
+    context_feature_layout = [dbc.Row(dbc.Col(html.H2("Model Performance by Context Feature", className="mt-5 mb-3 text-center"), width=12))]
+    unique_context_features = sorted(aggregated_df['context_feature'].unique())
+
+    for feature in unique_context_features:
+        feature_df = aggregated_df[aggregated_df['context_feature'] == feature]
+        if not feature_df.empty:
+            summary_df = feature_df.groupby(['model_name', 'evaluation']).size().reset_index(name='count')
+            model_totals = summary_df.groupby('model_name')['count'].sum().reset_index(name='total_model_count')
+            summary_df = pd.merge(summary_df, model_totals, on='model_name', how='left')
+            summary_df['percentage'] = (summary_df['count'] / summary_df['total_model_count']).fillna(0)
+
+            fig_context_feature = px.bar(summary_df,
+                                         x='model_name',
+                                         y='count',
+                                         color='evaluation',
+                                         barmode='group',
+                                         title=f'Performance for Context: {feature}',
+                                         labels={'count': 'Number of Outcomes', 'model_name': 'AI Model'},
+                                         color_discrete_map={
+                                             outcome: 'green' if 'Correct' in outcome else ('red' if 'Incorrect' in outcome else 'orange')
+                                             for outcome in summary_df['evaluation'].unique()
+                                         },
+                                         custom_data=['percentage'])
+            fig_context_feature.update_layout(xaxis_tickangle=-45)
+            fig_context_feature.update_traces(texttemplate='%{y} (%{customdata[0]:.0%})', textposition='outside')
+            context_feature_layout.append(dbc.Card(dbc.CardBody(dcc.Graph(figure=fig_context_feature)), className="shadow-sm mb-4"))
+    # --- END MODIFICATION ---
+
+    # --- MODIFICATION: Add Analysis of Designated Unsolvable Problems ---
+    unsolvable_layout = []
+    df_unsolvable = aggregated_df[aggregated_df['correct_answer'] == 'Unable to solve']
+    if not df_unsolvable.empty:
+        unsolvable_layout.append(dbc.Row(dbc.Col(html.H2("Model Handling of Designated Unsolvable Problems", className="mt-5 mb-3 text-center"), width=12)))
+        summary_unsolvable_df = df_unsolvable.groupby(['model_name', 'evaluation']).size().reset_index(name='count') # Evaluation here will be specific to unsolvable outcomes
+        model_totals_unsolvable = summary_unsolvable_df.groupby('model_name')['count'].sum().reset_index(name='total_model_count')
+        summary_unsolvable_df = pd.merge(summary_unsolvable_df, model_totals_unsolvable, on='model_name', how='left')
+        summary_unsolvable_df['percentage'] = (summary_unsolvable_df['count'] / summary_unsolvable_df['total_model_count']).fillna(0)
+
+        fig_unsolvable = px.bar(summary_unsolvable_df,
+                                  x='model_name',
+                                  y='count',
+                                  color='evaluation', # These are evaluations like "Correct, input is unsolvable!"
+                                  barmode='group',
+                                  title='Model Responses to Problems Marked as Unsolvable',
+                                  labels={'count': 'Number of Outcomes', 'model_name': 'AI Model', 'evaluation': 'Outcome for Unsolvable Problem'},
+                                  color_discrete_map={
+                                      outcome: 'green' if 'Correct' in outcome else ('red' if 'Incorrect' in outcome else 'orange')
+                                      for outcome in summary_unsolvable_df['evaluation'].unique()
+                                  },
+                                  custom_data=['percentage'])
+        fig_unsolvable.update_layout(xaxis_tickangle=-45)
+        fig_unsolvable.update_traces(texttemplate='%{y} (%{customdata[0]:.0%})', textposition='outside')
+        unsolvable_layout.append(dbc.Card(dbc.CardBody(dcc.Graph(figure=fig_unsolvable)), className="shadow-sm mb-4"))
+    # --- END MODIFICATION ---
+
+    app.layout = dbc.Container(fluid=True, children=[
+        dbc.Row(dbc.Col(html.H1("LLM Calculus Problem Solving: Aggregated Results Analysis", className="text-center my-4"), width=12)),
+
+        *at_a_glance_section_children,
+
+        dbc.Row(dbc.Col(html.H2("Overall Model Performance Comparison", className="mt-4 mb-3 text-center"), width=12)),
+        dbc.Card(dbc.CardBody(dcc.Graph(id='overall-evaluation-summary', figure=fig_overall_eval)), className="shadow-sm mb-4"),
+
+        dbc.Row(dbc.Col(html.H2("Per-Problem Analysis", className="mt-5 mb-3 text-center"), width=12)),
+        *per_problem_layout,
+
+        # Add new sections to layout
+        *input_feature_layout,
+        *context_feature_layout,
+        *unsolvable_layout
     ])
 else:
     app.layout = dbc.Container(fluid=True, children=[ # Changed to DBC Container
