@@ -112,6 +112,7 @@ def get_openrouter_response(base64_image, model="mistralai/mistral-7b-instruct",
         "1. \"derivation\": A string containing your detailed step-by-step derivation. "
         "2. \"final_answer\": A string representing the mathematical answer, formatted for SymPy. "
         "This means it should be a Python-parsable string, like '2*x**2 + sin(x)'. "
+        "If the final answer is a floating-point number, round it to 5 decimal places. "
         "Use Python math syntax: `**` for power, `*` for multiplication, and standard function names "
         "like `sqrt()`, `log()`, `exp()`, `sin()`, `cos()`, `tan()`. "
         "Do NOT use LaTeX or any other formatting for this final_answer string. "
@@ -123,9 +124,15 @@ def get_openrouter_response(base64_image, model="mistralai/mistral-7b-instruct",
         "Please solve the calculus problem shown in the image. "
         "Provide your response as a JSON object with two string fields: 'derivation' and 'final_answer'. "
         "The 'derivation' field should contain all your reasoning and work step-by-step. "
-        "The 'final_answer' field must be the final simplified answer, formatted as a Python string "
+        "The 'final_answer' field must be the final simplified mathematical *expression*, formatted as a Python string "
         "suitable for SymPy's `sympify()` function (e.g., '(x+1)/2'). "
-        "If you are unable to find a solution, the 'final_answer' field must be exactly \"Unable to solve\". "
+        "If the problem involves solving an equation for a variable (e.g., solving for 'y' in terms of 'x'), "
+        "the 'final_answer' should be the expression that this variable equals. For example, if the solution is "
+        "'y = x**2 + C', the 'final_answer' should be 'x**2 + C'. Do *not* include the 'y =' part or the full equation "
+        "in the 'final_answer'. "
+        "If the final answer is a floating-point number, please round it to 5 decimal places. "
+        "If the solution is an implicit equation from which the variable cannot be expressed as a simple expression, "
+        "or if you are unable to find a solution for any other reason, the 'final_answer' field must be exactly \"Unable to solve\". "
         "Your entire output should be only this JSON object."
     )
 
@@ -202,6 +209,9 @@ def evaluate_answer(llm_answer, correct_answer, simple_mode=True):
     if llm_answer == "Unable to solve" and correct_answer not in "Unable to solve":
         return "Incorrect, LLM is unable to solve, but the correct answer exists!"
     
+    if correct_answer == "Unable to solve" and llm_answer != "Unable to solve":
+        return "Incorrect, LLM is able to solve, but the correct answer is unsolvable!"
+    
     if simple_mode:
         # Simple string comparison (basic)
         # Remove spaces and convert to lowercase for more flexible comparison
@@ -225,13 +235,55 @@ def evaluate_answer(llm_answer, correct_answer, simple_mode=True):
 
         return "Incorrect"
     else:
+        # Attempt to treat answers as floats and compare with rounding
+        try:
+            llm_float = float(llm_answer)
+            # Correct answer might be like "Float(\\"123.456\\")"
+            # Try to extract the number part for correct_answer if it's a string containing "Float"
+            correct_answer_str = str(correct_answer)
+            if "Float(" in correct_answer_str and correct_answer_str.endswith(")"):
+                 # Attempt to extract the numeric part within Float("...")
+                 # This is a basic extraction, might need to be more robust
+                 try:
+                     # Example: Float("123.45") -> 123.45
+                     # Example: Float('1.23e+5') -> 1.23e+5
+                     # Need to handle quotes around the number carefully
+                     start = correct_answer_str.find("(") + 1
+                     end = correct_answer_str.rfind(")")
+                     num_str = correct_answer_str[start:end]
+                     # Remove potential inner quotes like Float(" '123.45' ")
+                     num_str = num_str.strip().strip("'\"")
+                     correct_float = float(num_str)
+                 except ValueError:
+                     # If extraction fails, fall back to original correct_answer for sympify
+                     pass # correct_float will not be defined, sympify path will be taken
+            else:
+                correct_float = float(correct_answer_str)
+
+            # If both are successfully converted to float
+            if 'correct_float' in locals() and isinstance(llm_float, float) and isinstance(correct_float, float):
+                # Round to 5 decimal places (or any desired precision)
+                if round(llm_float, 5) == round(correct_float, 5):
+                    return "Correct, Floats are equivalent (rounded)!"
+                else:
+                    return f"Incorrect, Floats are NOT equivalent (rounded): LLM={round(llm_float, 5)}, Expected={round(correct_float, 5)}"
+        except (ValueError, TypeError):
+            # If conversion to float fails, proceed to SymPy comparison
+            pass
+
         try:
             try:
                 expr_llm = sympify(llm_answer)
                 expr_correct = sympify(correct_answer)
-                if expr_llm.equals(expr_correct): # .equals() performs simplification
-                     return "Correct, Answers are mathematically equivalent!"
+                # First, try the .equals() method
+                if expr_llm.equals(expr_correct):
+                     return "Correct, Answers are mathematically equivalent! (via .equals())"
+                # If .equals() is False, try simplifying the difference
+                elif (expr_llm - expr_correct).simplify() == 0:
+                    return "Correct, Answers are mathematically equivalent! (via simplified difference)"
                 else:
+                     # For debugging, log the simplified difference if it's not zero
+                     logger.info(f"Simplified difference for non-equivalence: {(expr_llm - expr_correct).simplify()}")
                      return "Incorrect, Answers are NOT mathematically equivalent!"
             except (SympifyError, TypeError, SyntaxError) as symp_err:
                  logger.warning(f"SymPy Error comparing '{llm_answer}' and '{correct_answer}': {symp_err}")
