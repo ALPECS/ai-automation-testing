@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from PIL import Image
 from sympy import sympify, SympifyError # We'll uncomment and use this later for robust comparison
 import logging
-from pydantic import BaseModel, validator # Added Pydantic imports
+from pydantic import BaseModel, field_validator # Added Pydantic imports
 import concurrent.futures # Added for parallel execution
 
 # --- Pydantic Model Definition ---
@@ -16,7 +16,7 @@ class LLMResponse(BaseModel):
     derivation: str
     final_answer: str
 
-    @validator('final_answer')
+    @field_validator('final_answer')
     def validate_final_answer(cls, value):
         if value == "Unable to solve":
             return value

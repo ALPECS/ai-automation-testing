@@ -3,6 +3,5 @@ python-dotenv
 pandas
 Pillow
 sympy
-streamlit
 dash
 dash-bootstrap-components
