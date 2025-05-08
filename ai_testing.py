@@ -93,7 +93,8 @@ def get_openrouter_response(base64_image, model=AI_MODEL, max_tokens=500):
     system_rule = (
         "You are a calculus solver.  Return your working if you like, "
         "but the very last line **must** be just one python‑sympify string, "
-        "wrapped exactly like  ```YOUR_STRING```"
+        "wrapped exactly like  ```YOUR_STRING```. If you are unable to solve the problem, "
+        "the last line should be exactly ```Unable to solve```"
     )
     
     prompt = "Solve the calculus problem shown in the image."
@@ -158,6 +159,9 @@ def evaluate_answer(llm_answer, correct_answer, simple_mode=True):
     # Remove error messages if present
     if llm_answer.startswith("Error:"):
         return "Evaluation Error"
+
+    if llm_answer == "Unable to solve":
+        return "Unsolvable"
 
     if simple_mode:
         # Simple string comparison (basic)

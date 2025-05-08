@@ -5,7 +5,7 @@ import io
 import os
 
 # Import the refactored test runner function and constants
-from chatgpt_testing import run_test, RESULTS_CSV_PATH
+from ai_testing import run_test, RESULTS_CSV_PATH
 
 # --- Streamlit UI Setup ---
 st.set_page_config(page_title="Calculus Problem Tester", layout="wide")
