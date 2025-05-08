@@ -14,4 +14,4 @@ image_name, input_feature, context_feature, correct_answer
 5.2.PNG, Integrals, Missing Symbols, 'Unable to solve'
 5.3.PNG, Integrals, Unsolvable, 'Unable to solve'
 6.2.PNG, Conceptual, Regular Image, '313920 * pi'
-6.3.PNG, Integral, Regular Image, 'Float("179336475494.78165")'
+6.3.PNG, Integrals, Regular Image, 'Float("179336475494.78165")'

@@ -1,21 +1,19 @@
 model_name,image_name,input_feature,context_feature,correct_answer,llm_answer,evaluation,run_id
-openai/gpt-4o-mini,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-e**(-3*x) + C*e**(-2*x),"Correct, Answers are mathematically equivalent! (via .equals())",0
-google/gemini-2.0-flash-001,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",0
-openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 16*x**(5/3),"Incorrect, Answers are NOT mathematically equivalent!",0
+openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 72*x**11,"Incorrect, Answers are NOT mathematically equivalent!",0
 google/gemini-2.0-flash-001,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),"Correct, Answers are mathematically equivalent! (via .equals())",0
 openai/gpt-4o-mini,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*(atan(6*x)**9)/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",0
 google/gemini-2.0-flash-001,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*atan(6*x)**9/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",0
-openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),(-3/x**4 - 1/sqrt(x))*(1 + sqrt(x**3)) + (3/2)*x**(3/2)*(x**(-3) - 2*sqrt(x)),"Incorrect, Answers are NOT mathematically equivalent!",0
+openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),(-3*(1 + sqrt(x**3))*x**(-4) - (1 + sqrt(x**3))/(sqrt(x)) + (3/2)*x**(1/2)*(x**(-3) - 2*sqrt(x))),"Incorrect, Answers are NOT mathematically equivalent!",0
 google/gemini-2.0-flash-001,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),-3/x**4 - 2/(3*x**(2/3)) - 3/(2*x**(5/2)) - 11*x**(5/6)/3,"Correct, Answers are mathematically equivalent! (via .equals())",0
 openai/gpt-4o-mini,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
-google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*log(13/7),"Correct, Answers are mathematically equivalent! (via .equals())",0
-openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt((x + 2)**2 + 1)*(x + 2) + log(sqrt((x + 2)**2 + 1) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",0
+google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),3/8*(13**(4/3) - 7**(4/3)) + 7/2*(log(13) - log(7)),"Correct, Answers are mathematically equivalent! (via .equals())",0
+openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt(x**2 + 4*x + 5)*(x + 2) + log(sqrt(x**2 + 4*x + 5) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",0
 google/gemini-2.0-flash-001,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),0
-openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",0
+openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,0,"Incorrect, Answers are NOT mathematically equivalent!",0
 google/gemini-2.0-flash-001,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",0
 openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
 google/gemini-2.0-flash-001,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),0
-openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",0
+openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C) / x**2,"Correct, Answers are mathematically equivalent! (via .equals())",0
 google/gemini-2.0-flash-001,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",0
 openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
 google/gemini-2.0-flash-001,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),-cos(x)*cos(2*x)/2 - sin(x) + 7*cos(x),"Correct, Answers are mathematically equivalent! (via .equals())",0
@@ -23,137 +21,129 @@ openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(e - 1
 google/gemini-2.0-flash-001,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
 openai/gpt-4o-mini,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
 google/gemini-2.0-flash-001,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),0
-openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",0
-google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a*x**4/(4*(b*y + c*z)**2) - n*y**2/(2*m*(m*x + f*z)**2),"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",0
+openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a/4*x**4/(by + cz)**2 + n/3*y**3/(mx + fz)**3,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",0
+google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",0
 openai/gpt-4o-mini,5.2.PNG,Integrals,Missing Symbols,Unable to solve,4.5,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",0
 google/gemini-2.0-flash-001,5.2.PNG,Integrals,Missing Symbols,Unable to solve,9/2,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",0
 openai/gpt-4o-mini,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",0
 google/gemini-2.0-flash-001,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",0
-openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,73958.68,"Incorrect, Answers are NOT mathematically equivalent!",0
+openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,739200.00000,"Incorrect, Answers are NOT mathematically equivalent!",0
 google/gemini-2.0-flash-001,6.2.PNG,Conceptual,Regular Image,313920 * pi,235200*pi,"Incorrect, Answers are NOT mathematically equivalent!",0
-openai/gpt-4o-mini,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
-google/gemini-2.0-flash-001,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),0
-openai/gpt-4o-mini,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",1
-google/gemini-2.0-flash-001,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",1
-openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 72*x**11,"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",0
+google/gemini-2.0-flash-001,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),0
+openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 16*x**(5/3),"Incorrect, Answers are NOT mathematically equivalent!",1
 google/gemini-2.0-flash-001,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),"Correct, Answers are mathematically equivalent! (via .equals())",1
 openai/gpt-4o-mini,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*(atan(6*x)**9)/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",1
 google/gemini-2.0-flash-001,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*atan(6*x)**9/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",1
-openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(2/3)*(x**(-3) - 2*sqrt(x))) + ((1 + sqrt(x**3))*(-3/x**4 - 1/sqrt(x))),"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(1/2)*(x**(-3) - 2*sqrt(x))) + ((1 + sqrt(x**3))*(-3*x**(-4) - x**(-1/2))),"Incorrect, Answers are NOT mathematically equivalent!",1
 google/gemini-2.0-flash-001,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),-3/x**4 - 2/(3*x**(2/3)) - 3/(2*x**(5/2)) - 11*x**(5/6)/3,"Correct, Answers are mathematically equivalent! (via .equals())",1
 openai/gpt-4o-mini,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
 google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),3/8*(13**(4/3) - 7**(4/3)) + 7/2*(log(13) - log(7)),"Correct, Answers are mathematically equivalent! (via .equals())",1
-openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt(x**2 + 4*x + 5)*(x + 2) + log(sqrt(x**2 + 4*x + 5) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt((x + 2)**2 + 1)*(x + 2) + log(sqrt((x + 2)**2 + 1) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",1
 google/gemini-2.0-flash-001,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),1
 openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",1
 google/gemini-2.0-flash-001,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",1
-openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),(x*(x**2 + 4)**2)/(y*(1 - y)),"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
 google/gemini-2.0-flash-001,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),1
 openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C) / x**2,"Correct, Answers are mathematically equivalent! (via .equals())",1
 google/gemini-2.0-flash-001,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",1
 openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
 google/gemini-2.0-flash-001,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),-cos(x)*cos(2*x)/2 - sin(x) + 7*cos(x),"Correct, Answers are mathematically equivalent! (via .equals())",1
-openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(exp(1) - 1)/4,"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(e - 1)/4,"Incorrect, Answers are NOT mathematically equivalent!",1
 google/gemini-2.0-flash-001,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
-openai/gpt-4o-mini,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),-23.75,"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
 google/gemini-2.0-flash-001,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),1
 openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",1
-google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a*x**4/(4*(b*y + c*z)**2) - n*y**2/(2*m*(m*x + f*z)**2),"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",1
+google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",1
 openai/gpt-4o-mini,5.2.PNG,Integrals,Missing Symbols,Unable to solve,4.5,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",1
 google/gemini-2.0-flash-001,5.2.PNG,Integrals,Missing Symbols,Unable to solve,9/2,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",1
 openai/gpt-4o-mini,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",1
 google/gemini-2.0-flash-001,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",1
-openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,739200.00000,"Incorrect, Answers are NOT mathematically equivalent!",1
+openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,739000.00,"Incorrect, Answers are NOT mathematically equivalent!",1
 google/gemini-2.0-flash-001,6.2.PNG,Conceptual,Regular Image,313920 * pi,235200*pi,"Incorrect, Answers are NOT mathematically equivalent!",1
-openai/gpt-4o-mini,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
-google/gemini-2.0-flash-001,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),1
-openai/gpt-4o-mini,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-e**(-3*x) + C*e**(-2*x),"Correct, Answers are mathematically equivalent! (via .equals())",2
-google/gemini-2.0-flash-001,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",2
-openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 72*x**11,"Incorrect, Answers are NOT mathematically equivalent!",2
+openai/gpt-4o-mini,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",1
+google/gemini-2.0-flash-001,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),1
+openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 16*x**(5/3),"Incorrect, Answers are NOT mathematically equivalent!",2
 google/gemini-2.0-flash-001,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),"Correct, Answers are mathematically equivalent! (via .equals())",2
 openai/gpt-4o-mini,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*(atan(6*x)**9)/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",2
 google/gemini-2.0-flash-001,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*atan(6*x)**9/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",2
-openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(2/3)*(x**(-3) - 2*sqrt(x))) + ((1 + sqrt(x**3))*(-3/x**4 - 1/sqrt(x))),"Incorrect, Answers are NOT mathematically equivalent!",2
+openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(2/3)*(x**(-3) - 2*sqrt(x))) + ((1 + sqrt(x**3))*(-3*x**(-4) - x**(-1/2))),"Incorrect, Answers are NOT mathematically equivalent!",2
 google/gemini-2.0-flash-001,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),-3/x**4 - 2/(3*x**(2/3)) - 3/(2*x**(5/2)) - 11*x**(5/6)/3,"Correct, Answers are mathematically equivalent! (via .equals())",2
 openai/gpt-4o-mini,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
-google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),3/8*(13**(4/3) - 7**(4/3)) + 7/2*(log(13) - log(7)),"Correct, Answers are mathematically equivalent! (via .equals())",2
-openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt(x**2 + 4*x + 5)*(x + 2) + log(sqrt(x**2 + 4*x + 5) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",2
+google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*log(13/7),"Correct, Answers are mathematically equivalent! (via .equals())",2
+openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,((x + 2)/2)*sqrt((x + 2)**2 + 1) + (1/2)*log(abs(x + 2 + sqrt((x + 2)**2 + 1))),"Incorrect, Answers are NOT mathematically equivalent!",2
 google/gemini-2.0-flash-001,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),2
 openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,0,"Incorrect, Answers are NOT mathematically equivalent!",2
 google/gemini-2.0-flash-001,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",2
 openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
 google/gemini-2.0-flash-001,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),2
-openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",2
+openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C) / x**2,"Correct, Answers are mathematically equivalent! (via .equals())",2
 google/gemini-2.0-flash-001,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",2
-openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),3*sqrt(2)*cos(x) - 2*cos(x) - log(abs(sec(x) + tan(x))),"Incorrect, Answers are NOT mathematically equivalent!",2
+openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
 google/gemini-2.0-flash-001,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),-cos(x)*cos(2*x)/2 - sin(x) + 7*cos(x),"Correct, Answers are mathematically equivalent! (via .equals())",2
 openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(e - 1)/4,"Incorrect, Answers are NOT mathematically equivalent!",2
-google/gemini-2.0-flash-001,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),2
+google/gemini-2.0-flash-001,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
 openai/gpt-4o-mini,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
 google/gemini-2.0-flash-001,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),2
-openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",2
-google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",2
+openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a*x**4/4/(by + cz)**2 + n*y**3/3/(mx + fz)**3,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",2
+google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a*x**4/(4*(b*y + c*z)**2) - n*y**2/(2*m*(m*x + f*z)**2),"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",2
 openai/gpt-4o-mini,5.2.PNG,Integrals,Missing Symbols,Unable to solve,4.5,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",2
 google/gemini-2.0-flash-001,5.2.PNG,Integrals,Missing Symbols,Unable to solve,9/2,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",2
 openai/gpt-4o-mini,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",2
 google/gemini-2.0-flash-001,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",2
 openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,73958.68,"Incorrect, Answers are NOT mathematically equivalent!",2
 google/gemini-2.0-flash-001,6.2.PNG,Conceptual,Regular Image,313920 * pi,235200*pi,"Incorrect, Answers are NOT mathematically equivalent!",2
-openai/gpt-4o-mini,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
-google/gemini-2.0-flash-001,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),2
-openai/gpt-4o-mini,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",3
-google/gemini-2.0-flash-001,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",3
-openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),15*x**(1/2) - (7/2)*x**(5/2) + 24*x**3,"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",2
+google/gemini-2.0-flash-001,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),2
+openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 72*x**11,"Incorrect, Answers are NOT mathematically equivalent!",3
 google/gemini-2.0-flash-001,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),"Correct, Answers are mathematically equivalent! (via .equals())",3
 openai/gpt-4o-mini,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*(atan(6*x)**9)/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",3
 google/gemini-2.0-flash-001,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*atan(6*x)**9/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",3
-openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(2/3)*(x**(-3) - 2*sqrt(x))) + ((1 + sqrt(x**3))*(-3/x**4 - 1/sqrt(x))),"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(5/2)*(x**(-3) - 2*sqrt(x))) + (1 + sqrt(x**3))*(-3/x**4 - 1/sqrt(x)),"Incorrect, Answers are NOT mathematically equivalent!",3
 google/gemini-2.0-flash-001,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),-3/x**4 - 2/(3*x**(2/3)) - 3/(2*x**(5/2)) - 11*x**(5/6)/3,"Correct, Answers are mathematically equivalent! (via .equals())",3
 openai/gpt-4o-mini,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",3
-google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*log(13/7),"Correct, Answers are mathematically equivalent! (via .equals())",3
-openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt((x + 2)**2 + 1)*(x + 2) + log(sqrt((x + 2)**2 + 1) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",3
+google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),3/8*(13**(4/3) - 7**(4/3)) + 7/2*(log(13) - log(7)),"Correct, Answers are mathematically equivalent! (via .equals())",3
+openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt(x**2 + 4*x + 5)*(x + 2) + log(sqrt(x**2 + 4*x + 5) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",3
 google/gemini-2.0-flash-001,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),3
-openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,0,"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",3
 google/gemini-2.0-flash-001,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",3
 openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",3
 google/gemini-2.0-flash-001,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),3
-openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C) / x**2,"Correct, Answers are mathematically equivalent! (via .equals())",3
+openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",3
 google/gemini-2.0-flash-001,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",3
-openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),sec(x)*(-2*cos(x) + 3*sqrt(2) + 2),"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",3
 google/gemini-2.0-flash-001,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),-cos(x)*cos(2*x)/2 - sin(x) + 7*cos(x),"Correct, Answers are mathematically equivalent! (via .equals())",3
-openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(e - 1)/4,"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(exp(1) - 1)/4,"Incorrect, Answers are NOT mathematically equivalent!",3
 google/gemini-2.0-flash-001,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),3
-openai/gpt-4o-mini,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),25,"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",3
 google/gemini-2.0-flash-001,4.2.png,Multiple Integrals,Regular Image,(200/3)*(5**(1/2)),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),3
-openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,Unable to solve,"Correct, input is unsolvable!",3
+openai/gpt-4o-mini,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a*x**4/(4*(b*y + c*z)**2) + n*y**3/(3*(m*x + f*z)**3),"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",3
 google/gemini-2.0-flash-001,5.1.PNG,Integrals,Missing Symbols,Unable to solve,a*x**4/(4*(b*y + c*z)**2) - n*y**2/(2*m*(m*x + f*z)**2),"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",3
 openai/gpt-4o-mini,5.2.PNG,Integrals,Missing Symbols,Unable to solve,4.5,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",3
 google/gemini-2.0-flash-001,5.2.PNG,Integrals,Missing Symbols,Unable to solve,9/2,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",3
 openai/gpt-4o-mini,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",3
 google/gemini-2.0-flash-001,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",3
-openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,739200.00000,"Incorrect, Answers are NOT mathematically equivalent!",3
+openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,73958.68,"Incorrect, Answers are NOT mathematically equivalent!",3
 google/gemini-2.0-flash-001,6.2.PNG,Conceptual,Regular Image,313920 * pi,235200*pi,"Incorrect, Answers are NOT mathematically equivalent!",3
-openai/gpt-4o-mini,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",3
-google/gemini-2.0-flash-001,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),3
-openai/gpt-4o-mini,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",4
-google/gemini-2.0-flash-001,image.png,Question Topic.Eqn With Integrating Factor.Valid Input,Regular Image,C * e**(-2*x) - e**(-3*x),-exp(-3*x) + C*exp(-2*x),"Incorrect, Answers are NOT mathematically equivalent!",4
-openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),15*x**(1/2) - (7/2)*x**(5/2) + 24*x**3,"Incorrect, Answers are NOT mathematically equivalent!",4
+openai/gpt-4o-mini,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",3
+google/gemini-2.0-flash-001,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),3
+openai/gpt-4o-mini,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),75*x**(13/2) - (7/2)*x**(5/2) + 72*x**11,"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,1.1.png,Derivatives,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),"Correct, Answers are mathematically equivalent! (via .equals())",4
 openai/gpt-4o-mini,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*(atan(6*x)**9)/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,1.2.png,Derivatives,Regular Image,10 * (log(x**2 + 1) - atan(6*x))**9 * (2*x/(x**2 + 1) - 6/(36*x**2 + 1)),2*x/(x**2 + 1) - 60*atan(6*x)**9/(1 + 36*x**2),"Incorrect, Answers are NOT mathematically equivalent!",4
-openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(1/2))*(x**(-3) - 2*sqrt(x)) + (1 + sqrt(x**3))*(-3*x**(-4) - x**(-1/2)),"Incorrect, Answers are NOT mathematically equivalent!",4
+openai/gpt-4o-mini,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),((3/2)*x**(2/3)*(x**(-3) - 2*sqrt(x))) + ((1 + sqrt(x**3))*(-3/x**4 - 1/sqrt(x))),"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,1.3.png,Derivatives,Regular Image,-3*x**(-4) - (3/2)*x**(-5/2) - (2/3)*x**(-2/3) - (11/3)*x**(5/6),-3/x**4 - 2/(3*x**(2/3)) - 3/(2*x**(5/2)) - 11*x**(5/6)/3,"Correct, Answers are mathematically equivalent! (via .equals())",4
 openai/gpt-4o-mini,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",4
 google/gemini-2.0-flash-001,2.1.png,Integrals,Regular Image,(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7)),3/8*(13**(4/3) - 7**(4/3)) + 7/2*(log(13) - log(7)),"Correct, Answers are mathematically equivalent! (via .equals())",4
 openai/gpt-4o-mini,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,(1/2)*(sqrt(x**2 + 4*x + 5)*(x + 2) + log(sqrt(x**2 + 4*x + 5) + (x + 2))),"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,2.2.png,Integrals,Regular Image,(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C,Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),4
-openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",4
+openai/gpt-4o-mini,2.3.png,Integrals,Regular Image,-oo,0,"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,2.3.png,Integrals,Regular Image,-oo,-oo,"Correct, Answers are mathematically equivalent! (via .equals())",4
-openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),(x**2 * y * (x**2 + 4)**2) / (x * y**2 - x * y**3),"Incorrect, Answers are NOT mathematically equivalent!",4
+openai/gpt-4o-mini,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),(x*(x**2 + 4)**2)/(y*(1 - y)),"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,3.1.png,Differential Equations,Regular Image,6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3),Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),4
 openai/gpt-4o-mini,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C) / x**2,"Correct, Answers are mathematically equivalent! (via .equals())",4
 google/gemini-2.0-flash-001,3.2.png,Differential Equations,Regular Image,(C - cos(x)) / x**2,(-cos(x) + C)/x**2,"Correct, Answers are mathematically equivalent! (via .equals())",4
-openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),sec(x)*(-2*cos(x) + 3*sqrt(2) + 2),"Incorrect, Answers are NOT mathematically equivalent!",4
+openai/gpt-4o-mini,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),Error: API call failed - 'cos' object is not callable,Evaluation Error,4
 google/gemini-2.0-flash-001,3.3.png,Differential Equations,Regular Image,-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x),-cos(x)*cos(2*x)/2 - sin(x) + 7*cos(x),"Correct, Answers are mathematically equivalent! (via .equals())",4
 openai/gpt-4o-mini,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),(e - 1)/4,"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,4.1.png,Multiple Integrals,Regular Image,(1/2)*(E - 1),Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",4
@@ -165,7 +155,7 @@ openai/gpt-4o-mini,5.2.PNG,Integrals,Missing Symbols,Unable to solve,4.5,"Incorr
 google/gemini-2.0-flash-001,5.2.PNG,Integrals,Missing Symbols,Unable to solve,9/2,"Incorrect, LLM is able to solve, but the correct answer is unsolvable!",4
 openai/gpt-4o-mini,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",4
 google/gemini-2.0-flash-001,5.3.PNG,Integrals,Unsolvable,Unable to solve,Unable to solve,"Correct, input is unsolvable!",4
-openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,73958.68,"Incorrect, Answers are NOT mathematically equivalent!",4
+openai/gpt-4o-mini,6.2.PNG,Conceptual,Regular Image,313920 * pi,739200.0,"Incorrect, Answers are NOT mathematically equivalent!",4
 google/gemini-2.0-flash-001,6.2.PNG,Conceptual,Regular Image,313920 * pi,235200*pi,"Incorrect, Answers are NOT mathematically equivalent!",4
-openai/gpt-4o-mini,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",4
-google/gemini-2.0-flash-001,6.3.PNG,Integral,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),4
+openai/gpt-4o-mini,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Unable to solve,"Incorrect, LLM is unable to solve, but the correct answer exists!",4
+google/gemini-2.0-flash-001,6.3.PNG,Integrals,Regular Image,"Float(""179336475494.78165"")",Error - LLM returned an invalid response format,Evaluation Error (SymPy Parse),4
