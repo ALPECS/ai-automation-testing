@@ -1,19 +1,37 @@
 import os
 import base64
 import csv
+import json # Added for JSON parsing
 import pandas as pd
 from openai import OpenAI
 from dotenv import load_dotenv
 from PIL import Image
 from sympy import sympify, SympifyError # We'll uncomment and use this later for robust comparison
 import logging
+from pydantic import BaseModel, validator # Added Pydantic imports
+
+# --- Pydantic Model Definition ---
+class LLMResponse(BaseModel):
+    derivation: str
+    final_answer: str
+
+    @validator('final_answer')
+    def validate_final_answer(cls, value):
+        if value == "Unable to solve":
+            return value
+        try:
+            sympify(value) # Try to parse with SymPy
+            return value
+        except SympifyError:
+            raise ValueError("Final answer must be a valid SymPy expression or 'Unable to solve'")
+# --- End Pydantic Model Definition ---
 
 load_dotenv()
 openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 AI_MODEL = "openai/gpt-4o"
 PROBLEMS_CSV_PATH = "problems.csv"
-RESULTS_CSV_PATH = "results_openrouter.csv"
+RESULTS_CSV_PATH = "results_pydantic.csv"
 IMAGE_DIR = "calculus_problems"
 
 # Configure logging to output to console by default. Streamlit app will add a handler.
@@ -81,43 +99,38 @@ def encode_image_to_base64(image_path):
         logger.error(f"Error encoding image {image_path}: {e}")
         return None
 
-# --- CHANGE: Renamed function slightly for clarity ---
 # Function to call OpenRouter API
 def get_openrouter_response(base64_image, model="mistralai/mistral-7b-instruct", max_tokens=1000):
     """
-    Sends the image and prompt to the OpenRouter API and returns the text response.
-    The LLM is instructed to solve a calculus problem, show its work, and then provide
-    the final answer on the very last line, formatted as a Python string for SymPy's sympify(),
-    enclosed in triple backticks.
+    Sends the image and prompt to the OpenRouter API, expects a JSON response,
+    validates it, and returns the final answer.
     """
 
-    # This system rule sets the persona and high-level, critical instructions.
     system_rule = (
-        "You are an expert calculus solver. Your task is to solve the problem provided, "
-        "showing your detailed step-by-step derivation. After your derivation, the absolute "
-        "final line of your entire response MUST be the mathematical answer formatted for SymPy. "
-        "This means it should be a Python-parsable string, like '2*x**2 + sin(x)', enclosed in "
-        "triple backticks (e.g., ```2*x**2 + sin(x)```). Use Python math syntax: `**` for power, "
-        "`*` for multiplication, and standard function names like `sqrt()`, `log()`, `exp()`, `sin()`, `cos()`, `tan()`. "
-        "Do NOT use LaTeX or any other formatting for this final sympify string. "
-        "If you cannot solve the problem, the final line must be exactly: ```Unable to solve```. "
-        "No other text should accompany this final triple-backticked line."
+        "You are an expert calculus solver. Your task is to solve the problem provided. "
+        "You MUST provide your response as a JSON object with two keys: "
+        "1. \"derivation\": A string containing your detailed step-by-step derivation. "
+        "2. \"final_answer\": A string representing the mathematical answer, formatted for SymPy. "
+        "This means it should be a Python-parsable string, like '2*x**2 + sin(x)'. "
+        "Use Python math syntax: `**` for power, `*` for multiplication, and standard function names "
+        "like `sqrt()`, `log()`, `exp()`, `sin()`, `cos()`, `tan()`. "
+        "Do NOT use LaTeX or any other formatting for this final_answer string. "
+        "If you cannot solve the problem, the value for 'final_answer' MUST be exactly: \"Unable to solve\"."
+        "Ensure your entire response is a single, valid JSON object."
     )
 
-    # This is the user's query, reinforcing the instructions from their perspective.
-    # It explicitly tells the LLM what to do with the image and reiterates the final line format.
     user_prompt_text = (
         "Please solve the calculus problem shown in the image. "
-        "Show all your reasoning and work step-by-step. "
-        "After you have explained your solution, ensure that the VERY LAST LINE of your response "
-        "is the final simplified answer, formatted as a Python string suitable for SymPy's `sympify()` function. "
-        "This string must be enclosed in triple backticks. For example, if the answer is (x+1)/2, "
-        "the last line should be ```(x+1)/2```. "
-        "If you are unable to find a solution, the last line must be ```Unable to solve```. "
-        "Remember, no other text or explanation on that final line, just the triple backticks and the expression (or 'Unable to solve')."
+        "Provide your response as a JSON object with two string fields: 'derivation' and 'final_answer'. "
+        "The 'derivation' field should contain all your reasoning and work step-by-step. "
+        "The 'final_answer' field must be the final simplified answer, formatted as a Python string "
+        "suitable for SymPy's `sympify()` function (e.g., '(x+1)/2'). "
+        "If you are unable to find a solution, the 'final_answer' field must be exactly \"Unable to solve\". "
+        "Your entire output should be only this JSON object."
     )
 
     if not base64_image:
+        logger.error("Invalid image data passed to get_openrouter_response.")
         return "Error: Invalid image data. No image provided."
 
     messages = [
@@ -138,35 +151,27 @@ def get_openrouter_response(base64_image, model="mistralai/mistral-7b-instruct",
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=max_tokens,
-            temperature=0  
+            max_tokens=max_tokens, # Consider increasing if derivations are long
+            temperature=0,
+            response_format={"type": "json_object"} # Request JSON output from supported models
         )
-        full_response = response.choices[0].message.content.strip()
+        raw_response_content = response.choices[0].message.content.strip()
+        # logger.info(f"Raw LLM JSON response: {raw_response_content}")
 
-        lines = full_response.splitlines()
-        if not lines:
-            logger.warning("Empty response received from API.")
-            return "Error: Empty response from API."
-
-        last_line = lines[-1].strip()
-        
-        last_three_lines = lines[-3:]
-
-        # Remove the surrounding ```<answer>``` tags if present
-        #print the last three lines for debugging
-        logger.info(f"Last Three Lines before cleaning:{last_three_lines}")
-        
-        cleaned_last_line = last_line.replace("```", "").replace("<answer>", "").replace("```", "").strip()
-
-        return cleaned_last_line
+        try:
+            # Validate the response using the Pydantic model
+            validated_response = LLMResponse.model_validate_json(raw_response_content)
+            logger.info(f"Validated LLM Answer: {validated_response.final_answer}")
+            # The entire validated_response.derivation could be logged or stored if needed
+            return validated_response.final_answer
+        except ValueError as pydantic_error: # Catches Pydantic validation errors
+            logger.error(f"Pydantic validation error: {pydantic_error}. Raw response: {raw_response_content}")
+            return f"Error: LLM response validation failed - {pydantic_error}"
+        except json.JSONDecodeError as json_error:
+            logger.error(f"JSON decoding error: {json_error}. Raw response: {raw_response_content}")
+            return f"Error: LLM response is not valid JSON - {json_error}"
 
     except Exception as e:
-        # Log the error or handle it as needed
-        print(f"Error calling OpenRouter API: {e}")
-        return "Error: API call failed."
-
-    except Exception as e:
-        # --- CHANGE: Use logger ---
         logger.error(f"Error calling OpenRouter API: {e}")
         return f"Error: API call failed - {e}"
 
@@ -340,4 +345,4 @@ def run_test():
 
 
 if __name__ == "__main__":
-    run_test() # --- Call the renamed function ---
+    run_test() # --- Call the renamed function --- 

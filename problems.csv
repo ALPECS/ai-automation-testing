@@ -6,3 +6,8 @@ image.png, Question Topic.Eqn With Integrating Factor.Valid Input, Regular Image
 2.1.png, Integrals, Regular Image, '(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7))'
 2.2.png, Integrals, Regular Image, "(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C"
 2.3.png, Integrals, Regular Image, '-oo'
+3.1.png, Differential Equations, Regular Image, "6*x**(-2/5) - (7/2)*x**(5/2) + 16*x**(5/3)"
+3.2.png, Differential Equations, Regular Image, "(C - cos(x)) / x**2"
+3.3.png, Differential Equations, Regular Image, "-(1/2)*cos(x)*cos(2*x) - sin(x) + 7*cos(x)"
+4.1.png, Multiple Integrals, Regular Image, "(1/2)*(E - 1)"
+4.2.png, Multiple Integrals, Regular Image, "(200/3)*(5**(1/2))"
