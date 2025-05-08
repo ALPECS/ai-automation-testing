@@ -6,3 +6,9 @@ image.png, Question Topic.Eqn With Integrating Factor.Valid Input, Regular Image
 2.1.png, Integrals, Regular Image, '(3/8)*(13**(4/3) - 7**(4/3)) + (7/2)*(log(13) - log(7))'
 2.2.png, Integrals, Regular Image, "(1/2)*((x + 2)*(x**2 + 4*x + 5)**(1/2) + log(Abs(x + 2 + (x**2 + 4*x + 5)**(1/2)))) + C"
 2.3.png, Integrals, Regular Image, '-oo'
+5.1.PNG, Integrals, Missing Symbols, 'Unable to solve'
+5.2.PNG, Integrals, Missing Symbols, 'Unable to solve'
+5.3.PNG, Integrals, Unsolvable, 'Unsolvable'
+6.1.PNG, Conceptual, Regular Image, 'Derivatives and integrals are opposites'
+6.2.PNG, Conceptual, Regular Image, '313920 * pi'
+6.3.PNG, Integral, Regular Image, 'Float("179336475494.78165")'
