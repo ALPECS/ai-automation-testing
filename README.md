@@ -31,6 +31,7 @@ This project provides tools to test an AI model's ability to solve calculus prob
 ├── requirements.txt            # Python dependencies
 ├── aggregated_results_pydantic.csv # Output CSV from ai_testing_pydantic.py, input for dashboard.py (created after a run)
 └── README.md                   # This file
+```
 
 ## How It Works
 
