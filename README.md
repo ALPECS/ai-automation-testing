@@ -4,7 +4,7 @@ This project provides tools to test an AI model's ability to solve calculus prob
 
 ## Features
 
-*   **AI Model Testing (`ai_testing_pydantic.py` - inferred name):**
+*   **AI Model Testing (`ai_testing.py`):**
     *   Loads calculus problems from a `problems.csv` file (image name, features, correct answer).
     *   Sends images from `calculus_problems/` to an AI model via OpenRouter.
     *   Extracts and evaluates the AI's final answer against the correct answer (string comparison or SymPy-based mathematical equivalence).
@@ -23,7 +23,7 @@ This project provides tools to test an AI model's ability to solve calculus prob
 ```
 .
 ├── .gitignore
-├── ai_testing_pydantic.py      # Core script for testing logic & generating aggregated_results_pydantic.csv (inferred name)
+├── ai_testing.py      # Core script for testing logic & generating aggregated_results_pydantic.csv (inferred name)
 ├── dashboard.py                # Dash application for visualizing aggregated results
 ├── calculus_problems/          # Directory containing problem images
 │   └── image.png
@@ -31,10 +31,8 @@ This project provides tools to test an AI model's ability to solve calculus prob
 ├── requirements.txt            # Python dependencies
 ├── aggregated_results_pydantic.csv # Output CSV from ai_testing_pydantic.py, input for dashboard.py (created after a run)
 └── README.md                   # This file
-```
-*(Note: Older files like `app.py` (Streamlit) and `chatgpt_testing.py` might exist in the repository but this README focuses on the `ai_testing_pydantic.py` and `dashboard.py` workflow).*
 
-## How it Works
+## How It Works
 
 1.  **Setup**:
     *   Problem definitions (image name, features, correct answer) are listed in `problems.csv`.
@@ -76,7 +74,7 @@ This project provides tools to test an AI model's ability to solve calculus prob
         *   `correct_answer`: The correct solution, formatted as a string that SymPy can parse (e.g., `'C * exp(-2*x) - exp(-3*x)'`).
 6.  **Run the AI testing script:**
     ```bash
-    python ai_testing_pydantic.py
+    python ai_testing.py
     ```
     *(This will generate/update the `aggregated_results_pydantic.csv` file)*
 7.  **Run the Dashboard application:**
@@ -84,16 +82,6 @@ This project provides tools to test an AI model's ability to solve calculus prob
     python dashboard.py
     ```
 8.  Open your web browser and navigate to the URL provided by Dash (usually `http://0.0.0.0:8050` or `http://127.0.0.1:8050`).
-
-## Key Files
-
-*   `ai_testing_pydantic.py` (inferred name): The core script for running AI model tests.
-*   `dashboard.py`: The Dash web application for visualizing results.
-*   `problems.csv`: Defines the calculus problems, their corresponding images, and correct answers.
-*   `calculus_problems/`: Directory to store the image files for the calculus problems.
-*   `aggregated_results_pydantic.csv`: Stores the aggregated output of the test runs, used by the dashboard.
-*   `requirements.txt`: Lists the Python packages required.
-*   `.env` (create this): Used to store the `OPENROUTER_API_KEY`.
 
 ## Dependencies
 
@@ -107,4 +95,4 @@ The main dependencies are typically listed in `requirements.txt`. Key packages f
 *   `Pillow`
 *   `sympy`
 
-Refer to `requirements.txt` for specific versions and a complete list. 
+Refer to `requirements.txt` for specific versions and a complete list.
